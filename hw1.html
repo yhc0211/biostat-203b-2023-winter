@@ -328,7 +328,7 @@ drwxr-xr-x@ 11 tinachang  staff   352 Jan 19 16:10 icu
 </div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> /Users/tinachang/Desktop/203b-hw/hw1/mimic/core/admissions.csv.gz <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-n</span> +2 <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#There are 523740 rows. (no header)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#There are 523740 rows.(no header)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  523740</code></pre>
 </div>
@@ -336,7 +336,7 @@ drwxr-xr-x@ 11 tinachang  staff   352 Jan 19 16:10 icu
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> <span class="op">&lt;</span> /Users/tinachang/Desktop/203b-hw/hw1/mimic/core/admissions.csv.gz <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-n</span> +2 <span class="kw">|</span> <span class="fu">awk</span> <span class="at">-F,</span> <span class="st">'{print $1}'</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">uniq</span> <span class="kw">|</span> <span class="fu">wc</span> <span class="at">-l</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co">#There are 256878 unique patients. (no header)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co">#There are 256878 unique patients.(no header)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  256878</code></pre>
 </div>
@@ -563,14 +563,14 @@ Su Mo Tu We Th Fr Sa
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">date</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show the date and time right now</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Wed Jan 25 10:01:40 PST 2023</code></pre>
+<pre><code>Wed Jan 25 12:22:03 PST 2023</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hostname</span></span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show Domain Name System name </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>TinadeMacBook-Pro.local</code></pre>
+<pre><code>dhcp-10-144-187-56.dgsom.guest</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
@@ -584,21 +584,21 @@ Su Mo Tu We Th Fr Sa
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">uname</span> <span class="at">-a</span></span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show the System information right now.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Darwin TinadeMacBook-Pro.local 21.6.0 Darwin Kernel Version 21.6.0: Mon Aug 22 20:17:10 PDT 2022; root:xnu-8020.140.49~2/RELEASE_X86_64 x86_64</code></pre>
+<pre><code>Darwin dhcp-10-144-187-56.dgsom.guest 21.6.0 Darwin Kernel Version 21.6.0: Mon Aug 22 20:17:10 PDT 2022; root:xnu-8020.140.49~2/RELEASE_X86_64 x86_64</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">uptime</span></span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show information about how long your system has been running together with the current time, number of users with running sessions, and the system load averages for the past 1, 5, and 15 minutes.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>10:01  up 7 days, 21:28, 2 users, load averages: 2.76 2.52 2.36</code></pre>
+<pre><code>12:22  up 7 days, 23:48, 2 users, load averages: 2.77 3.09 2.56</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">who</span> am i</span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show current username</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>tinachan tty??    Jan 25 10:01 </code></pre>
+<pre><code>tinachan tty??    Jan 25 12:22 </code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
@@ -606,7 +606,7 @@ Su Mo Tu We Th Fr Sa
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show users currently logged in to UNIX or Linux operating system.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>tinachang console  Jan 17 12:36 
-tinachang ttys002  Jan 24 16:37 </code></pre>
+tinachang ttys000  Jan 25 11:09 </code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
@@ -625,7 +625,8 @@ tinachang ttys002  Jan 24 16:37 </code></pre>
 <div class="sourceCode cell-code" id="cb60"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">last</span> <span class="kw">|</span> <span class="fu">head</span></span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show top 10 list of all the users logged in and out.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>tinachang  ttys002                   Tue Jan 24 16:37   still logged in
+<pre><code>tinachang  ttys000                   Wed Jan 25 11:09   still logged in
+tinachang  ttys002                   Tue Jan 24 16:37 - 16:37  (00:00)
 tinachang  ttys000                   Tue Jan 24 12:44 - 12:44  (00:00)
 tinachang  ttys000                   Tue Jan 24 12:09 - 12:09  (00:00)
 tinachang  ttys000                   Tue Jan 24 10:46 - 10:46  (00:00)
@@ -633,8 +634,7 @@ tinachang  ttys000                   Tue Jan 24 08:42 - 08:42  (00:00)
 tinachang  ttys000                   Tue Jan 24 07:50 - 07:50  (00:00)
 tinachang  ttys000                   Mon Jan 23 21:53 - 21:53  (00:00)
 tinachang  ttys000                   Mon Jan 23 21:46 - 21:46  (00:00)
-tinachang  ttys000                   Mon Jan 23 21:44 - 21:44  (00:00)
-tinachang  ttys000                   Mon Jan 23 21:40 - 21:40  (00:00)</code></pre>
+tinachang  ttys000                   Mon Jan 23 21:44 - 21:44  (00:00)</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
@@ -649,7 +649,7 @@ tinachang  ttys000                   Mon Jan 23 21:40 - 21:40  (00:00)</code></p
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Used to delay for a fixed amount of time during the execution of any script. Here I check if the shell stops for five seconds.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
-real    0m5.005s
+real    0m5.008s
 user    0m0.001s
 sys 0m0.002s</code></pre>
 </div>

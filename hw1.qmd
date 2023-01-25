@@ -54,7 +54,7 @@ PhysioNet Credential: <https://drive.google.com/file/d/1jB-F4fwDuMa7z3Ql5jTmrDrs
 
 ## Q3. Linux Shell Commands
 
-1.  The `~/mimic` folder within the Docker container contains data sets from MIMIC-IV. Refer to the documentation <https://mimic.mit.edu/docs/iv/> for details of data files.\
+1.The `~/mimic` folder within the Docker container contains data sets from MIMIC-IV. Refer to the documentation <https://mimic.mit.edu/docs/iv/> for details of data files.\
 
 ```{bash, echo=T}
 ls -l /Users/tinachang/Desktop/203b-hw/hw1/mimic

@@ -192,10 +192,8 @@ loaded via a namespace (and not attached):
 </section>
 <section id="q3.-linux-shell-commands" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="q3.-linux-shell-commands"><span class="header-section-number">3</span> Q3. Linux Shell Commands</h2>
-<ol type="1">
-<li>The <code>~/mimic</code> folder within the Docker container contains data sets from MIMIC-IV. Refer to the documentation <a href="https://mimic.mit.edu/docs/iv/" class="uri">https://mimic.mit.edu/docs/iv/</a> for details of data files.<br>
-</li>
-</ol>
+<p>1.The <code>~/mimic</code> folder within the Docker container contains data sets from MIMIC-IV. Refer to the documentation <a href="https://mimic.mit.edu/docs/iv/" class="uri">https://mimic.mit.edu/docs/iv/</a> for details of data files.<br>
+</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /Users/tinachang/Desktop/203b-hw/hw1/mimic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -563,7 +561,7 @@ Su Mo Tu We Th Fr Sa
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">date</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show the date and time right now</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Wed Jan 25 12:22:03 PST 2023</code></pre>
+<pre><code>Wed Jan 25 12:43:19 PST 2023</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
@@ -591,14 +589,14 @@ Su Mo Tu We Th Fr Sa
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">uptime</span></span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show information about how long your system has been running together with the current time, number of users with running sessions, and the system load averages for the past 1, 5, and 15 minutes.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>12:22  up 7 days, 23:48, 2 users, load averages: 2.77 3.09 2.56</code></pre>
+<pre><code>12:43  up 8 days, 10 mins, 2 users, load averages: 2.42 2.26 2.26</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">who</span> am i</span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show current username</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>tinachan tty??    Jan 25 12:22 </code></pre>
+<pre><code>tinachan tty??    Jan 25 12:43 </code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
@@ -611,7 +609,7 @@ tinachang ttys000  Jan 25 11:09 </code></pre>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">w</span></span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show who is logged on and what they are doing.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show who is logged on and what they are doing</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>9:58  up 7 days, 21:25, 2 users, load averages: 2.66 2.39 2.30 USER     TTY      FROM              LOGIN@  IDLE WHAT tinachang console  -                17Jan23 7days - tinachang s002     -                Tue16       - w</code></p>
 <div class="cell" data-layout-align="center">
@@ -649,9 +647,9 @@ tinachang  ttys000                   Mon Jan 23 21:44 - 21:44  (00:00)</code></p
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Used to delay for a fixed amount of time during the execution of any script. Here I check if the shell stops for five seconds.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
-real    0m5.008s
+real    0m5.006s
 user    0m0.001s
-sys 0m0.002s</code></pre>
+sys 0m0.001s</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">

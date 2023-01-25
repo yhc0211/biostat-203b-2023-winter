@@ -326,7 +326,7 @@ who
 ```{bash}
 #| eval: false
 w
-#show who is logged on and what they are doing.
+#show who is logged on and what they are doing
 ```
 `9:58  up 7 days, 21:25, 2 users, load averages: 2.66 2.39 2.30
 USER     TTY      FROM              LOGIN@  IDLE WHAT

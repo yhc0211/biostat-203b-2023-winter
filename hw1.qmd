@@ -135,12 +135,12 @@ zcat < /Users/tinachang/Desktop/203b-hw/hw1/mimic/core/admissions.csv.gz | head
 ```
 ```{bash, echo=T}
 zcat < /Users/tinachang/Desktop/203b-hw/hw1/mimic/core/admissions.csv.gz | tail -n +2 | wc -l
-#There are 523740 rows. (no header)
+#There are 523740 rows.(no header)
 ```
 ```{bash, echo=T}
 zcat < /Users/tinachang/Desktop/203b-hw/hw1/mimic/core/admissions.csv.gz | tail -n +2 | awk -F, '{print $1}' | sort |
 uniq | wc -l
-#There are 256878 unique patients. (no header)
+#There are 256878 unique patients.(no header)
 ```
 
 

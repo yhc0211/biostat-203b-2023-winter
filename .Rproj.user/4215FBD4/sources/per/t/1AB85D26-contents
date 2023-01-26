@@ -326,10 +326,14 @@ who
 ```
 
 ```{bash}
+#| eval: false
 w
 #show who is logged on and what they are doing
 ``` 
-
+16:44  up 8 days,  4:11, 2 users, load averages: 2.36 2.53 2.43
+USER     TTY      FROM              LOGIN@  IDLE WHAT
+tinachang console  -                17Jan23 8days -
+tinachang s001     -                16:44       - w
     
 ```{bash, echo=T}
 id

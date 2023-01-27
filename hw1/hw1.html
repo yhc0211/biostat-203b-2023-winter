@@ -562,14 +562,14 @@ Su Mo Tu We Th Fr Sa
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">date</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show the date and time right now</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Thu Jan 26 12:40:51 PST 2023</code></pre>
+<pre><code>Thu Jan 26 15:54:27 PST 2023</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hostname</span></span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show Domain Name System name </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>TinadeMacBook-Pro.local</code></pre>
+<pre><code>dhcp-10-144-187-56.dgsom.guest</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
@@ -583,21 +583,21 @@ Su Mo Tu We Th Fr Sa
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">uname</span> <span class="at">-a</span></span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show the System information right now.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Darwin TinadeMacBook-Pro.local 21.6.0 Darwin Kernel Version 21.6.0: Mon Aug 22 20:17:10 PDT 2022; root:xnu-8020.140.49~2/RELEASE_X86_64 x86_64</code></pre>
+<pre><code>Darwin dhcp-10-144-187-56.dgsom.guest 21.6.0 Darwin Kernel Version 21.6.0: Mon Aug 22 20:17:10 PDT 2022; root:xnu-8020.140.49~2/RELEASE_X86_64 x86_64</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">uptime</span></span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show information about how long your system has been running together with the current time, number of users with running sessions, and the system load averages for the past 1, 5, and 15 minutes.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>12:40  up 9 days, 7 mins, 1 user, load averages: 2.29 2.19 2.03</code></pre>
+<pre><code>15:54  up 9 days,  3:21, 1 user, load averages: 1.98 1.84 1.75</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">who</span> am i</span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show current username</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>tinachan tty??    Jan 26 12:40 </code></pre>
+<pre><code>tinachan tty??    Jan 26 15:54 </code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
@@ -611,7 +611,7 @@ Su Mo Tu We Th Fr Sa
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">w</span></span>
 <span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="co">#show who is logged on and what they are doing</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>12:40  up 9 days, 7 mins, 1 user, load averages: 2.29 2.19 2.03
+<pre><code>15:54  up 9 days,  3:21, 1 user, load averages: 1.98 1.84 1.75
 USER     TTY      FROM              LOGIN@  IDLE WHAT
 tinachang console  -                17Jan23 9days -</code></pre>
 </div>
@@ -651,9 +651,9 @@ tinachang  ttys002                   Wed Jan 25 12:50 - 12:50  (00:00)</code></p
 <span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Used to delay for a fixed amount of time during the execution of any script. Here I check if the shell stops for five seconds.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
-real    0m5.009s
+real    0m5.011s
 user    0m0.001s
-sys 0m0.002s</code></pre>
+sys 0m0.003s</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">

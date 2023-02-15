@@ -1,0 +1,1022 @@
+---
+title: "Biostat 203B Homework 2"
+subtitle: Due Feb 10 @ 11:59PM
+author: Yung-Han Chang (UID 105912578)
+format:
+  html:
+    theme: cosmo
+    number-sections: true
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    code-fold: false
+knitr:
+  opts_chunk: 
+    cache: false    
+    echo: true
+    fig.align: 'center'
+    fig.width: 6
+    fig.height: 4
+    message: FALSE
+---
+  
+  Display machine information for reproducibility:
+```{r}
+#| eval: false
+sessionInfo()
+```
+
+Load necessary libraries (you can add more as needed).
+```{r setup}
+library(data.table)
+library(lubridate)
+library(R.utils)
+library(tidyverse)
+```
+
+MIMIC data location
+```{r}
+mimic_path <- "~/mimic"
+```
+
+In this exercise, we use tidyverse (ggplot2, dplyr, etc) to explore the [MIMIC-IV](https://mimic.mit.edu/docs/iv/) data introduced in [homework 1](https://ucla-biostat-203b.github.io/2023winter/hw/hw1/hw1.html) and to build a cohort of ICU stays.
+
+Display the contents of MIMIC data folder. 
+```{r}
+system(str_c("ls -l ", mimic_path, "/"), intern = TRUE)
+system(str_c("ls -l ", mimic_path, "/core"), intern = TRUE)
+system(str_c("ls -l ", mimic_path, "/hosp"), intern = TRUE)
+system(str_c("ls -l ", mimic_path, "/icu"), intern = TRUE)
+```
+
+## Q1. `read.csv` (base R) vs `read_csv` (tidyverse) vs `fread` (data.table)
+
+There are quite a few utilities in R for reading plain text data files. Let us test the speed of reading a moderate sized compressed csv file, `admissions.csv.gz`, by three programs: `read.csv` in base R, `read_csv` in tidyverse, and `fread` in the popular data.table package. 
+
+Which function is fastest? Is there difference in the (default) parsed data types? (Hint: R function `system.time` measures run times.)
+
+For later questions, we stick to the `read_csv` in tidyverse.
+
+
+###solution###
+```{r, echo=TRUE}
+#`read.csv` in base R
+system.time(read.csv(str_c(mimic_path, "/core/admissions.csv.gz")))
+#`read_csv` in tidyverse
+system.time(read_csv(str_c(mimic_path, "/core/admissions.csv.gz")))
+# `fread` in the popular data.table package.
+system.time(fread(str_c(mimic_path, "/core/admissions.csv.gz")))
+```
+
+
+`fread()` is the fasted one and `read.csv()` is the slowest one.
+
+Data Types
+```{r, echo=TRUE}
+#`read.csv` in base R
+str(read.csv(str_c(mimic_path, "/core/admissions.csv.gz")))
+#`read_csv` in tidyverse
+str(read_csv(str_c(mimic_path, "/core/admissions.csv.gz")))
+# `fread` in the popular data.table package.
+str(fread(str_c(mimic_path, "/core/admissions.csv.gz")))
+```
+
+
+The default data type for `read_csv` and `fread` are the same. However, `read.csv` is different. The data structure all are data.frame, but the class of variable are different.
+
+## Q2. ICU stays
+
+`icustays.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/icu/icustays/>) contains data about Intensive Care Units (ICU) stays. The first 10 lines are
+
+```{r}
+system(
+  str_c(
+    "zcat <", 
+    str_c(mimic_path, "/icu/icustays.csv.gz"), 
+    " | head"
+  ), 
+  intern = TRUE
+)
+```
+
+1. Import `icustatys.csv.gz` as a tibble `icustays_tble`. 
+
+```{r, echo=TRUE}
+icustays_tble <- read_csv(str_c(mimic_path, "/icu/icustays.csv.gz"))
+head(icustays_tble)
+```
+
+2. How many unique `subject_id`? Can a `subject_id` have multiple ICU stays? 
+
+```{r, echo=TRUE}
+icustays_tble %>%
+  distinct(subject_id) %>%
+  nrow()
+```
+
+There are 53150 unique subject_id. 
+
+```{r, echo=TRUE}
+icustays_tble %>%
+  group_by(subject_id) %>%
+  summarise(n = n()) 
+```
+Yes, it can have multiple ICU stays.
+  
+3. Summarize the number of ICU stays per `subject_id` by graphs. 
+
+```{r, echo=TRUE}
+num_id <- icustays_tble %>% count(subject_id)
+num_id %>% ggplot(aes(x = n)) +
+  geom_bar()
+```
+
+Most people only have one time ICU stay, about 40000 people.
+
+4. For each `subject_id`, let's only keep the first ICU stay in the tibble `icustays_tble`. (Hint: `slice_min` and `slice_max` may take long. Think alternative ways to achieve the same function.)
+
+```{r, echo=TRUE}
+icustays_tble <- icustays_tble %>%
+  group_by(subject_id, ) %>%
+  arrange(intime) %>%
+  filter(row_number() == 1) %>%
+  print(width = Inf)
+```
+
+
+
+
+## Q3. `admission` data
+
+Information of the patients admitted into hospital is available in `admissions.csv.gz`. See <https://mimic.mit.edu/docs/iv/modules/hosp/admissions/> for details of each field in this file. The first 10 lines are
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    str_c(mimic_path, "/core/admissions.csv.gz"), 
+    " | head"
+    ), 
+  intern = TRUE
+)
+```
+
+1. Import `admissions.csv.gz` as a tibble `admissions_tble`.
+```{r, echo=TRUE}
+admissions_tble = read_csv(str_c(mimic_path, "/core/admissions.csv.gz"))
+head(admissions_tble)
+```
+2. Let's only keep the admissions that have a match in `icustays_tble` according to `subject_id` and `hadmi_id`.
+
+```{r, echo=TRUE}
+admissions_tble <-
+  admissions_tble %>%
+  semi_join(icustays_tble, by = c("subject_id", "hadm_id")) %>%
+  print(width = Inf)
+```
+
+
+
+
+3. Summarize the following variables by graphics. 
+
+- admission year 
+
+```{r, echo=TRUE}
+#admission year 
+admissions_tble$admittime <- ymd_hms(admissions_tble$admittime)
+admissions_tble %>%
+  mutate(year = year(admittime), label = TRUE) %>%
+  ggplot(aes(x = year)) +
+  geom_bar()
+```
+
+The number drops apparently after year 2190.
+
+- admission month  
+```{r, echo=TRUE}
+admissions_tble %>%
+  mutate(month = month(admittime), label = TRUE) %>%
+  ggplot(aes(x = month)) +
+  geom_bar()
+```
+It seems similar in each admission month.
+
+- admission month day  
+```{r, echo=TRUE}
+admissions_tble %>%
+  mutate(mday = mday(admittime), label = TRUE) %>%
+  ggplot(aes(x = mday)) +
+  geom_bar()
+```
+It seems similar in each admission month day.
+
+- admission week day 
+```{r, echo=TRUE}
+admissions_tble %>%
+  mutate(wday = wday(admittime), label = TRUE) %>%
+  ggplot(aes(x = wday)) +
+  geom_bar()
+```
+It seems similar in each admission week day.
+
+- admission hour (anything unusual?) 
+```{r, echo=TRUE}
+admissions_tble %>%
+  mutate(hour = hour(admittime), label = TRUE) %>%
+  ggplot(aes(x = hour)) +
+  geom_bar()
+```
+There are some pattern. 0  and 7  have more counts than others. 0 may be that if they just replace missing number as 0. And hospital might open at 7 am.
+- admission minute (anything unusual?)  
+```{r, echo=TRUE}
+admissions_tble %>%
+  mutate(minute = minute(admittime), label = TRUE) %>%
+  ggplot(aes(x = minute)) +
+  geom_bar()
+```
+0 min 15 min 30min and 45min has much more counts. I think it is because people do this intentionally.
+
+- length of hospital stay (anything unusual?)    
+```{r, echo=TRUE}
+admissions_tble %>%
+  mutate(length = as.numeric(admissions_tble$dischtime - admissions_tble$admittime) /
+           3600) %>%
+  ggplot(aes(x = length)) +
+  geom_bar() +
+  coord_cartesian(xlim = c(0, 50))
+```
+Most patients only stay at hospital less than 10 days.
+## Q4. `patients` data
+
+Patient information is available in `patients.csv.gz`. See <https://mimic.mit.edu/docs/iv/modules/hosp/patients/> for details of each field in this file. The first 10 lines are
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    str_c(mimic_path, "/core/patients.csv.gz"), 
+    " | head"
+  ), 
+  intern = TRUE
+)
+```
+
+1. Import `patients.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/hosp/patients/>) as a tibble `patients_tble` and only keep the patients who have a match in `icustays_tble` (according to `subject_id`).
+
+```{r, echo=TRUE}
+patients_tble <- read_csv(str_c(mimic_path, "/core/patients.csv.gz"))
+patients_tble <-
+  patients_tble %>%
+  semi_join(icustays_tble, by = "subject_id") %>%
+  print(width = Inf)
+```
+
+
+2. Summarize variables `gender` and `anchor_age`, and explain any patterns you see.
+
+`gender`
+```{r, echo=TRUE}
+patients_tble %>%
+  ggplot(mapping = aes(x = gender, fill = gender)) +
+  geom_bar(width = 1)
+```
+There are more male than female.
+
+`anchor_age`
+```{r, echo=TRUE}
+patients_tble %>%
+  ggplot(mapping = aes(x = anchor_age, fill = anchor_age)) +
+  geom_bar(width = 1)
+```
+
+It is strange that there are much more people are 91 years old. I guess it's because they mark patients who are older than 91 year old as 91 in the data.
+## Q5. Lab results
+
+`labevents.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/hosp/labevents/>) contains all laboratory measurements for patients. The first 10 lines are
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    str_c(mimic_path, "/hosp/labevents.csv.gz"), 
+    " | head"
+  ), 
+  intern = TRUE
+)
+```
+`d_labitems.csv.gz` is the dictionary of lab measurements. 
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    str_c(mimic_path, "/hosp/d_labitems.csv.gz"), 
+    " | head"
+  ), 
+  intern = TRUE
+)
+```
+
+1. Find how many rows are in `labevents.csv.gz`.
+```{r, echo=TRUE}
+system(
+  str_c(
+    "zcat < ", 
+    str_c(mimic_path, "/hosp/labevents.csv.gz"),
+    " | tail -n +2 | wc -l"
+  ), 
+  intern = TRUE
+)
+```
+There are 122103667 rows in `labevents.csv.gz`.
+
+2. We are interested in the lab measurements of creatinine (50912), potassium (50971), sodium (50983), chloride (50902), bicarbonate (50882), hematocrit (51221), white blood cell count (51301), and glucose (50931). Retrieve a subset of `labevents.csv.gz` only containing these items for the patients in `icustays_tble` as a tibble `labevents_tble`. 
+
+```{r, echo=TRUE}
+labevents <-
+  read_csv(str_c(mimic_path, "/hosp/labevents_filtered_itemid.csv.gz"),
+           lazy = T)
+measure <- c(
+  "50912",
+  "50971",
+  "50983",
+  "50902",
+  "50882",
+  "51221",
+  "51301",
+  "50931",
+  "50960",
+  "50893"
+)
+d_labitems_tble <-
+  read_csv(str_c(mimic_path, "/hosp/d_labitems.csv.gz"))
+labevents_tble <-
+  labevents %>%
+  semi_join(icustays_tble, by = c("subject_id")) %>%
+  filter(itemid %in% measure)
+labevents_tble
+```
+
+
+Hint: `labevents.csv.gz` is a data file too big to be read in by the `read_csv` function in its default setting. Utilize the `col_select` option in the `read_csv` function to reduce the memory burden. It took my computer 5-10 minutes to ingest this file. If your computer really has trouble importing `labevents.csv.gz`, you can import from the reduced data file `labevents_filtered_itemid.csv.gz`.
+
+3. Further restrict `labevents_tble` to the first lab measurement during the ICU stay. 
+```{r, echo=TRUE}
+labevents_tble <- labevents_tble %>%
+  left_join(select(icustays_tble, subject_id, intime, outtime),
+            by = c("subject_id")) %>%
+  filter(charttime >= intime, charttime <= outtime) %>%
+  group_by(subject_id, itemid) %>%
+  arrange(charttime, .by_group = TRUE) %>%
+  slice_head(n = 1) %>%
+  ungroup() %>%
+  print(width = Inf)
+```
+4. Summarize the lab measurements by appropriate numerics and graphics. 
+
+###summarize the lab measurements (numerics): ###
+
+```{r, echo=TRUE}
+d_labitems_tble <-
+  read_csv(str_c(mimic_path, "/hosp/d_labitems.csv.gz"))
+labevents_tble1 <-
+  labevents_tble  %>% left_join(select(d_labitems_tble, itemid, label),
+                                by = c("itemid")) %>%
+  select(-c(itemid, charttime, intime, outtime)) %>%
+  pivot_wider(names_from = label, values_from = valuenum) %>%
+  rename(WBCs = "White Blood Cells")
+summary(labevents_tble1[-1])
+```
+###summarize the lab measurements (graphic): ###
+```{r, echo=TRUE}
+Bic <-
+  labevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Bicarbonate)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(labevents_tble1$Bicarbonate,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Cal <-
+  labevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = `Calcium, Total`)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(labevents_tble1$`Calcium, Total` ,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Chl <-
+  labevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Chloride)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(labevents_tble1$Chloride ,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Cre <-
+  labevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Creatinine)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(labevents_tble1$Creatinine ,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Glu <-
+  labevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Glucose)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(labevents_tble1$Glucose ,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Mag <-
+  labevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Magnesium)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(labevents_tble1$Magnesium ,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Pot <-
+  labevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Potassium)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(labevents_tble1$Potassium,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Sod <-
+  labevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Sodium)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(labevents_tble1$Sodium,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Hem <-
+  labevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Hematocrit)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(labevents_tble1$Hematocrit,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+WBC <-
+  labevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = WBCs)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(labevents_tble1$WBCs,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+library(gridExtra)
+grid.arrange(Bic, Cal, Chl, Cre, Glu, Mag, Pot, Sod, Hem, WBC)
+```
+
+## Q6. Vitals from charted events
+
+`chartevents.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/icu/chartevents/>) contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The `itemid` variable indicates a single measurement type in the database. The `value` variable is the value measured for `itemid`. The first 10 lines of `chartevents.csv.gz` are
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    str_c(mimic_path, "/icu/chartevents.csv.gz"), 
+    " | head"), 
+  intern = TRUE
+)
+```
+`d_items.csv.gz` (<https://mimic.mit.edu/docs/iv/modules/icu/d_items/>) is the dictionary for the `itemid` in `chartevents.csv.gz`. 
+```{r}
+system(
+  str_c(
+    "zcat < ", 
+    str_c(mimic_path, "/icu/d_items.csv.gz"), 
+    " | head"), 
+  intern = TRUE
+)
+```
+
+1. We are interested in the vitals for ICU patients: heart rate (220045), mean non-invasive blood pressure (220181), systolic non-invasive blood pressure (220179), body temperature in Fahrenheit (223761), and respiratory rate (220210). Retrieve a subset of `chartevents.csv.gz` only containing these items for the patients in `icustays_tble` as a tibble `chartevents_tble`.
+
+```{r, echo=TRUE}
+chartevents <-
+  read_csv(str_c(mimic_path, "/icu/chartevents_filtered_itemid.csv.gz"))
+vitals <- c("220045", "220181", "220179", "223761", "220210")
+chartevents_tble <-
+  chartevents %>%
+  semi_join(icustays_tble, by = "subject_id") %>%
+  filter(itemid %in% vitals)
+chartevents_tble
+```
+
+
+Hint: `chartevents.csv.gz` is a data file too big to be read in by the `read_csv` function in its default setting. Utilize the `col_select` option in the `read_csv` function to reduce the memory burden. It took my computer >15 minutes to ingest this file. If your computer really has trouble importing `chartevents.csv.gz`, you can import from the reduced data file `chartevents_filtered_itemid.csv.gz`.
+
+2. Further restrict `chartevents_tble` to the first vital measurement during the ICU stay. 
+
+```{r, echo=TRUE}
+chartevents_tble <- chartevents_tble %>%
+  left_join(select(icustays_tble, subject_id, intime, outtime),
+            by = c("subject_id")) %>%
+  filter(charttime >= intime, charttime <= outtime) %>%
+  group_by(subject_id, itemid) %>%
+  arrange(charttime, .by_group = TRUE) %>%
+  slice_head(n = 1) %>%
+  ungroup()
+chartevents_tble
+```
+
+3. Summarize these vital measurements by appropriate numerics and graphics. 
+
+###summarize the vital measurements (numerics):###
+
+```{r, echo=TRUE}
+d_items_tble <- read_csv(str_c(mimic_path, "/icu/d_items.csv.gz"))
+chartevents_tble1 <-
+  chartevents_tble  %>% left_join(select(d_items_tble, itemid, label),
+                                  by = c("itemid")) %>%
+  select(-c(itemid, charttime, intime, outtime)) %>%
+  pivot_wider(names_from = label, values_from = valuenum) %>%
+  rename(
+    HR = "Heart Rate",
+    RR = "Respiratory Rate",
+    BP_mean = "Non Invasive Blood Pressure systolic",
+    BP_Systolic = "Non Invasive Blood Pressure mean",
+    TF = "Temperature Fahrenheit"
+  )
+chartevents_tble1 <- chartevents_tble1[, -2]
+chartevents_tble1 <- chartevents_tble1[, -2]
+summary(chartevents_tble1[-1])
+```
+
+###summarize the lab measurements (graphic):###
+```{r, echo=TRUE}
+HR <-
+  chartevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = HR)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(chartevents_tble1$HR,
+                                  c(0.05, 0.95),
+                                  na.rm = T))
+BP_mean <-
+  chartevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = BP_mean)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(chartevents_tble1$BP_mean,
+                                  c(0.05, 0.95),
+                                  na.rm = T))
+BP_Systolic <-
+  chartevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = BP_Systolic)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(chartevents_tble1$BP_Systolic,
+                                  c(0.05, 0.95),
+                                  na.rm = T))
+RR <- chartevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = RR)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(chartevents_tble1$RR,
+                                  c(0.05, 0.95),
+                                  na.rm = T))
+TF <-
+  chartevents_tble1 %>%
+  ggplot(mapping = aes(x = " ",
+                       y = TF)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(chartevents_tble1$TF,
+                                  c(0.05, 0.95),
+                                  na.rm = T))
+
+grid.arrange(HR, BP_mean, BP_Systolic, TF, RR)
+```
+
+
+## Q7. Putting things together
+
+Let us create a tibble `mimic_icu_cohort` for all ICU stays, where rows are the first ICU stay of each unique adult (age at admission > 18) and columns contain at least following variables  
+
+
+
+- all variables in `icustays.csv.gz`  
+- all variables in `admission.csv.gz`  
+- all variables in `patients.csv.gz`  
+- first lab measurements during ICU stay  
+- first vital measurements during ICU stay
+- an indicator variable `thirty_day_mort` whether the patient died within 30 days of hospital admission (30 day mortality)
+
+```{r, echo=TRUE}
+#combine with admission.csv.gz
+mimic_icu_cohort <-
+  icustays_tble %>%
+  left_join(admissions_tble, by = c("subject_id", "hadm_id"))
+#combine with patients.csv.gz
+mimic_icu_cohort <-
+  patients_tble %>%
+  left_join(mimic_icu_cohort, by = c("subject_id"))
+#combine with first lab measurements during ICU stay
+mimic_icu_cohort <-
+  labevents_tble1 %>%
+  left_join(mimic_icu_cohort, by = c("subject_id"))
+#combine with first lab measurements during ICU stay
+mimic_icu_cohort <-
+  chartevents_tble1 %>%
+  left_join(mimic_icu_cohort, by = c("subject_id"))
+#age
+mimic_icu_cohort <-
+  mimic_icu_cohort %>% mutate(age_ad = anchor_age + year(admittime) - anchor_year) %>%
+  filter(age_ad > 18) %>%
+  mutate(thirty_day_mort = ifelse(as.Date(deathtime) - as.Date(admittime) > 30,
+                                  1, 0)) %>%
+  print(width = Inf)
+
+```
+`0`:patients died within 30 days
+`1`:otherwise
+
+
+## Q8. Exploratory data analysis (EDA)
+
+Summarize following information using appropriate numerics or graphs.
+
+- `thirty_day_mort` vs demographic variables (ethnicity, language, insurance, marital_status, gender, age at hospital admission)
+
+***ethnicity***
+```{r, echo=TRUE}
+# numerical 
+mimic_icu_cohort %>%
+  group_by(thirty_day_mort, ethnicity) %>%
+  summarise(count = n()) %>%
+  spread(key = ethnicity , value = count) %>%
+  rowwise() %>%
+  mutate(total = sum(c_across("AMERICAN INDIAN/ALASKA NATIVE":"WHITE"),
+                     na.rm = T)) %>%
+  mutate_at(vars("AMERICAN INDIAN/ALASKA NATIVE":"WHITE"),
+            funs(round(. / total, digits = 3) * 100)) %>%
+  print(width = Inf)
+```
+
+The percentage of `thirty_day_mort` is similar in each group. We can do further proportion test to see if the percentage of patients who died within 30 days is the same in each ethnicity.
+
+
+###language###
+```{r, echo=TRUE}
+# numerical 
+mimic_icu_cohort %>%
+  group_by(thirty_day_mort, language) %>%
+  summarise(count = n()) %>%
+  spread(key = language , value = count) %>%
+  rowwise() %>%
+  mutate(total = sum(c_across("?":"ENGLISH"),
+                     na.rm = T)) %>%
+  mutate_at(vars("?":"ENGLISH"),
+            funs(round(. / total, digits = 3) * 100)) %>%
+  print(width = Inf)
+```
+We can see that patients speaking English is much more higher than NA group because most of patients speak English (90%). However, the percentage of thirty_day_mort is similar in each language group. We can also do further proportion test to figure it out.
+
+```{r, echo=TRUE}
+#insurance
+mimic_icu_cohort %>%
+  group_by(thirty_day_mort, insurance) %>%
+  summarise(count = n()) %>%
+  spread(key = insurance , value = count) %>%
+  rowwise() %>%
+  mutate(total = sum(c_across("Medicaid":"Other"),
+                     na.rm = T)) %>%
+  mutate_at(vars("Medicaid":"Other"),
+            funs(round(. / total, digits = 3) * 100)) %>%
+  print(width = Inf)
+round(prop.table(
+  table(
+    mimic_icu_cohort$insurance,
+    mimic_icu_cohort$thirty_day_mort
+  ) ,
+  2
+), 2)
+```
+It shows that patient who died within 30 days of hospital admission have higher proportion on choosing Medicare.
+
+#marital_status
+```{r, echo=TRUE}
+mimic_icu_cohort %>%
+  group_by(thirty_day_mort, marital_status) %>%
+  summarise(count = n()) %>%
+  spread(key = marital_status , value = count) %>%
+  rowwise() %>%
+  mutate(total = sum(c_across("DIVORCED":"<NA>"),
+                     na.rm = T)) %>%
+  mutate_at(vars("DIVORCED":"<NA>"),
+            funs(round(. / total, digits = 3) * 100)) %>%
+  print(width = Inf)
+```
+It shows that patients who died within 30 days have a smaller proportion of the single,divorced and married, and higher proportion in widowed.
+
+#gender
+```{r, echo=TRUE}
+mimic_icu_cohort %>%
+  group_by(thirty_day_mort, gender) %>%
+  summarise(count = n()) %>%
+  spread(key = gender , value = count) %>%
+  rowwise() %>%
+  mutate(total = sum(c_across("F":"M"),
+                     na.rm = T)) %>%
+  mutate_at(vars("F":"M"),
+            funs(round(. / total, digits = 3) * 100)) %>%
+  print(width = Inf)
+```
+It shows that the proportion is similar in each group. We can do proportion test to test it.
+
+
+
+#age at hospital admission
+```{r, echo=TRUE}
+mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ", y = age_ad)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free_y") +
+  coord_cartesian(ylim =
+                    quantile(mimic_icu_cohort$age_ad,
+                             c(0.05, 0.95),
+                             na.rm = T))
+```
+The boxplots show that the age at hospital admission of patient who died within 30 days or not are similar and have similar pattern. 
+
+
+- `thirty_day_mort` vs first lab measurements
+```{r, echo=TRUE}
+Bic <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Bicarbonate)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$Bicarbonate,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Cal <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = `Calcium, Total`)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$`Calcium, Total` ,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Chl <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Chloride)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$Chloride ,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Cre <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Creatinine)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$Creatinine ,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Glu <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Glucose)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$Glucose ,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Mag <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Magnesium)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$Magnesium ,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Pot <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Potassium)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$Potassium,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Sod <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Sodium)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$Sodium,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+Hem <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = Hematocrit)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$Hematocrit,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+WBC <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = WBCs)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$WBCs,
+                                  c(0.05, 0.95),
+                                  na.rm = T)) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+
+grid.arrange(Bic, Cal, Chl, Cre, Glu, Mag, Pot, Sod, Hem, WBC, ncol = 2)
+```
+`bicarbonate` , `creatinine` ,`glucose`, and `white blood cell` groups seem different. We can do further test to test if there are statistically significant. 
+
+
+
+- `thirty_day_mort` vs first vital measurements
+
+```{r, echo=TRUE}
+HR <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = HR)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$HR,
+                                  c(0.05, 0.95),
+                                  na.rm = T))
+BP_mean <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = BP_mean)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$BP_mean,
+                                  c(0.05, 0.95),
+                                  na.rm = T))
+BP_Systolic <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = BP_Systolic)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$BP_Systolic,
+                                  c(0.05, 0.95),
+                                  na.rm = T))
+RR <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = RR)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$RR,
+                                  c(0.05, 0.95),
+                                  na.rm = T))
+TF <-
+  mimic_icu_cohort %>%
+  ggplot(mapping = aes(x = " ",
+                       y = TF)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~ thirty_day_mort, scale = "free") +
+  coord_cartesian(ylim = quantile(mimic_icu_cohort$TF,
+                                  c(0.05, 0.95),
+                                  na.rm = T))
+grid.arrange(HR, BP_mean, BP_Systolic, TF, RR)
+```
+`Heart Rate` and `Respiratory Rate` group seem to have some difference but they need statistical test to check.
+
+- `thirty_day_mort` vs first ICU unit
+
+```{r, echo=TRUE}
+#first_careunit
+mimic_icu_cohort %>%
+  group_by(thirty_day_mort, first_careunit) %>%
+  summarise(count = n()) %>%
+  spread(key = first_careunit , value = count) %>%
+  rowwise() %>%
+  mutate(total = sum(
+    c_across(
+      "Cardiac Vascular Intensive Care Unit (CVICU)":"Trauma SICU (TSICU)"
+    ),
+    na.rm = T
+  )) %>%
+  mutate_at(
+    vars(
+      "Cardiac Vascular Intensive Care Unit (CVICU)":"Trauma SICU (TSICU)"
+    ),
+    funs(round(. / total, digits = 3) * 100)
+  ) %>%
+  print(width = Inf)
+```
+The percentage of paients died within 30 days is higher in `CCU` `MICU` `Neuro SICU` `TSICU` group.
+
+

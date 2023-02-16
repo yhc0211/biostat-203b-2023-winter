@@ -114,7 +114,7 @@ icustays_tble %>%
   nrow()
 ```
 
-There are 53150 unique subject_id. 
+There are 53150 unique subject_id . 
 
 ```{r, echo=TRUE}
 icustays_tble %>%

@@ -1,6 +1,9 @@
 ---
 title: "Biostat 203B Homework 3"
+<<<<<<< HEAD
 subtitle: Due Mar 1 @ 11:59PM
+=======
+>>>>>>> develop
 author: Yung-Han Chang 105912578
 format:
   html:
@@ -132,7 +135,10 @@ patients_tble <-
 labevents_tble <- tbl(con, "labevents") %>%
   show_query() %>%
   print(width = Inf)
+<<<<<<< HEAD
 
+=======
+>>>>>>> develop
 labevents_tble <- labevents_tble %>%
   semi_join(icustays_tble, by = c("subject_id")) %>%
   filter(itemid %in% c(50912, 
@@ -248,4 +254,7 @@ rm(list = ls())
 ## Q2. Shiny app
 
 Develop a Shiny app for exploring the ICU cohort data created in Q1. The app should reside in the `mimiciv_shiny` folder. The app should provide easy access to the graphical and numerical summaries of variables (demographics, lab measurements, vitals) in the ICU cohort.
+<<<<<<< HEAD
 
+=======
+>>>>>>> develop

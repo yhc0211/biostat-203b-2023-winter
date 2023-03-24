@@ -68,14 +68,15 @@ y_test <- icu_test$thirty_day_mort
 2. Train and tune the models using the training set.
 3. Compare model classification performance on the test set. Report both the area under ROC curve and accuracy for each model.
 ```{r}
-#logistics with lasso
+#logistics with elastic net
 library(caret)
+library(e1071)
 library(glmnet)
 library(pROC)
 
 control <- trainControl(method = "repeatedcv",
                               number = 5,
-                              repeats = 5,
+                              repeats = 2,
                               search = "random",
                               verboseIter = TRUE)
 
@@ -101,24 +102,52 @@ cat('ElasticNet AUC', auc_ela,"\n")
 #random forest
 library(randomForest)
 library(ROCR)
-fit_rf <- randomForest(as.factor(thirty_day_mort) ~ ., data=icu_train, ntree = 300)
-prob_rf <- as.data.frame(predict(fit_rf, icu_test, type = "prob"))
-pred_rf <- predict(fit_rf,  icu_test)
-accuracy_rf<-mean(pred_rf == icu_test$thirty_day_mort)
+control <- trainControl(method = "repeatedcv",
+                              number = 5,
+                              repeats = 2,
+                              search = "random",
+                              verboseIter = TRUE)
+
+rf_model <- train(as.factor(thirty_day_mort)~ .,
+                           data = icu_train,
+                           method = "rf",
+                           tuneLength = 25,
+                           trControl = control)
+
+
+
+pred_rf <- predict(rf_model, icu_test)
+accuracy_rf<-mean(pred_rf  == icu_test$thirty_day_mort)
 roc_rf <- roc(y_test, as.numeric(pred_rf))
 auc_rf<-auc(roc_rf)
+```
+```{r, echo = T}
 cat('RandomForest accuracy:', accuracy_rf,"\n")
 cat('RandomForest AUC', auc_rf,"\n")
 ```
 
 ```{r, echo = T}
 #SVM
-library(e1071)
-fit_svm = svm(as.factor(thirty_day_mort) ~ ., data=icu_train, kernel = "linear", cost = 10, scale = FALSE)
-pred_svm <- predict(fit_svm,icu_test, type = "response")
-accuracy_svm<-mean(pred_svm == icu_test$thirty_day_mort)
-roc_svm <- roc(y_test, as.numeric(pred_rf))
+control <- trainControl(method = "repeatedcv",
+                              number = 5,
+                              repeats = 2,
+                              search = "random",
+                              verboseIter = TRUE)
+
+svm_model <- train(as.factor(thirty_day_mort)~ .,
+                           data = icu_train,
+                           method = "svmRadial", 
+                           tuneLength = 25,                  
+                           preProc = c("center","scale"),
+                           trControl = control)
+
+pred_svm <- predict(svm_model, icu_test)
+accuracy_svm<-mean(pred_svm   == icu_test$thirty_day_mort)
+roc_svm <- roc(y_test, as.numeric(pred_svm))
 auc_svm<-auc(roc_svm)
+```
+
+```{r, echo = T}
 cat('SVM accuracy:', accuracy_svm,"\n")
 cat('SVM AUC', auc_svm,"\n")
 ```
